@@ -20,7 +20,10 @@ export const personSlice = createSlice({
             state.person.idade = action.payload.idade
             state.listPerson.push(state.person)
         },
+        remove:(state,action)=>{
+            state.listPerson = state.listPerson.filter(x => x.nome != action.payload)
+        }
     }
 })
-export const {add} = personSlice.actions
+export const {add, remove} = personSlice.actions
 export default personSlice.reducer

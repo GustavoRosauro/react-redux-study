@@ -1,48 +1,61 @@
-import {BaseSyntheticEvent, HTMLInputTypeAttribute, InputHTMLAttributes, SyntheticEvent, useRef, useState } from "react"
+import { BaseSyntheticEvent, HTMLInputTypeAttribute, InputHTMLAttributes, SyntheticEvent, useRef, useState } from "react"
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { selectCount, add} from "./personSlice";
+import { selectCount, add, PersonState, remove } from "./personSlice";
+import {Table,Space} from 'antd'
+import { ColumnsType } from "antd/es/table";
+import Column from "antd/es/table/Column";
 
-export function Person(){
+export function Person() {
     const personSlice = useAppSelector(selectCount);
     const dispatch = useAppDispatch();
-    const [person,setPerson] = useState({
-        nome:'',
-        idade:0
+    const [person, setPerson] = useState({
+        nome: '',
+        idade: 0
     });
     const nome = useRef<HTMLInputElement>(null);
-    const savePerson = ()=>{
+    const savePerson = () => {
         dispatch(add(person))
         clearInputs()
         nome.current?.focus()
     }
-    const handleInputChange = (e:BaseSyntheticEvent)=>{
-        const {name,value} = e.target;
-        setPerson({...person,[name]:value});
+    const DeleteRow = (nome:string)=>{
+        dispatch(remove(nome));
     }
-    const clearInputs = ()=>{
-       setPerson({nome:'',idade:0})
+    const handleInputChange = (e: BaseSyntheticEvent) => {
+        const { name, value } = e.target;
+        setPerson({ ...person, [name]: value });
     }
-    return(
+    const clearInputs = () => {
+        setPerson({ nome: '', idade: 0 })
+    }
+    const colums: ColumnsType<PersonState> = [
+        {
+            title:'Name',
+            dataIndex:'nome',
+            key:'nome'
+        },
+        {
+            title:'Age',
+            dataIndex:'idade',
+            key:'idade'
+        },
+        {
+            title:"Action",
+            key:'action',
+            render:(_:any,record:any)=>(
+                <Space size='middle'>
+                    <a onClick={() => DeleteRow(record.nome)}>Delete</a>
+                </Space>
+            )
+
+        }
+    ]
+    return (
         <div>
-            <input name="nome" value={person.nome} onChange={handleInputChange} ref={nome}/>
-            <input name="idade" value={person.idade} onChange={handleInputChange}/>
-            <input type="submit" value={'Salvar'} onClick={savePerson}/>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Idade</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-            {
-                personSlice.map(x=>
-                            <tr>
-                                <td>{x.nome}</td>
-                                <td>{x.idade}</td>
-                            </tr>)}
-                </tbody>
-                </table>
+            <input name="nome" value={person.nome} onChange={handleInputChange} ref={nome} />
+            <input name="idade" value={person.idade} onChange={handleInputChange} />
+            <input type="submit" value={'Salvar'} onClick={savePerson} />
+            <Table columns={colums} dataSource={personSlice}/>
         </div>
     )
 }
